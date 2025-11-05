@@ -7,6 +7,7 @@ import { limiter } from './src/shared/utils/helpers/limiter';
 import { testConnection } from './src/shared/utils/prisma/dbTesting';
 import { swaggerDocs } from './src/shared/config/swagger';
 import router from './src/modules/user/user.route';
+import cookieParser from 'cookie-parser';
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
@@ -23,6 +24,7 @@ app.use(limiter);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 //routes
 
