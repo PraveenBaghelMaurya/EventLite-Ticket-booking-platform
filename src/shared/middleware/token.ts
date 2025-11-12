@@ -6,6 +6,8 @@ import { NextFunction } from "express";
 import { Request, Response } from "express";
 import { prisma } from "../../shared/lib/prisma"
 
+dotenv.config();
+
 export const accessTokenGenerate = (user: any) => {
     try {
         const accessToken = jwt.sign({
@@ -43,30 +45,55 @@ export const generateAccessAndRefreshToken = (user: any) => {
     }
 }
 
-export const verifyAccessToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+// create if access token is expired using refresh token
+export const refreshAccessToken = async (refreshToken: string, res: Response, next: NextFunction) => {
+    try {
+        const refreshTokenDecoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as { id: number }
+        
+        const user = await prisma.user.findUnique({
+            where: { 
+                id: refreshTokenDecoded.id
+            }
+        });
 
-    const token = req.cookies.accessToken || req.headers.authorization?.replace('Bearer ', '')
-    if (!token) {
-        return ApiResponse.unauthorized(res, 'Unauthorized')
-    }
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { id: number }
-
-    const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            accessToken: true
+        if (!user) {
+            throw new Error('User not found');
         }
-    });
 
-    if (!user) {
-        return ApiResponse.unauthorized(res, 'Unauthorized')
+        const newAccessToken = accessTokenGenerate(user);
+        
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { 
+                accessToken: newAccessToken 
+            }
+        });
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: parseInt(process.env.ACCESS_TOKEN_EXPIRES_IN as string)
+        });
+        next();
+       
+
+    } catch (error: any) {
+        if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+            try {
+                const decoded = jwt.decode(refreshToken) as { id: number };
+                if (decoded?.id) {
+                    await prisma.user.update({
+                        where: { id: decoded.id },
+                        data: { 
+                            accessToken: null,
+                            refreshToken: null 
+                        }
+                    });
+                }
+            } catch (cleanupError) {
+                console.log(cleanupError);
+            }
+        }
+        return ApiResponse.error(res, { message: error.message });
     }
-
-    (req as any).user = user;
-
-    next()
-})
+};
