@@ -7,6 +7,7 @@ import { asyncHandler } from "../../shared/middleware/responseHandler";
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 
+//Authencation
 export const signUp = async (req: Request, res: Response) => {
     try {
         const pasredData = userValidation.safeParse(req.body)
@@ -166,4 +167,85 @@ export const signOut = async (req: Request, res: Response) => {
         });
     }
 }
+
+//user
+
+export const getUserProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.params.id;
+        const user = await prisma.user.findUnique({
+            where: {
+                id: Number(userId)
+            }
+        })
+        if (!user) {
+            return ApiResponse.error(res, { message: "User not found" })
+        }
+        return ApiResponse.success(res, { message: "User profile fetched successfully", data: user })
+    } catch (error) {
+        return ApiResponse.error(res, { message: "Internal server error" })
+    }
+}
+
+export const filterUser = async (req: Request, res: Response) => {
+    try {
+        const { searchQuery, page, limit } = req.query;
+        const pageNum = Number(page) || 1;
+        const limitNum = Number(limit) || 10;
+        const skip = (pageNum - 1) * limitNum;
+
+        const whereClause: any = {
+            role: { not: "ADMIN" }
+        };
+
+        if (searchQuery) {
+            whereClause.OR = [
+                { name: { contains: searchQuery as string, mode: 'insensitive' } },
+                { email: { contains: searchQuery as string, mode: 'insensitive' } },
+                { phone: { contains: searchQuery as string, mode: 'insensitive' } }
+            ];
+        }
+
+        const users = await prisma.user.findMany({
+            where: whereClause,
+            skip: skip,
+            take: limitNum,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                createdAt: true
+            
+            }
+        });
+
+        const totalUsers = await prisma.user.count({
+            where: whereClause
+        });
+
+        return ApiResponse.success(res, { 
+            message: "Users fetched successfully", 
+            data: {
+                users,
+                pagination: {
+                    currentPage: pageNum,
+                    limit: limitNum,
+                    totalUsers,
+                    totalPages: Math.ceil(totalUsers / limitNum),
+                    hasNext: pageNum < Math.ceil(totalUsers / limitNum),
+                    hasPrev: pageNum > 1
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Filter user error:', error);
+        return ApiResponse.error(res, { message: "Internal server error" });
+    }
+}
+
+//with verification user can not update email and phone
+
 
