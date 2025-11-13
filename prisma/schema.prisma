@@ -3,15 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
   name         String?
   email        String   @unique
-  phone        Int?     @unique
+  phone        String?  @unique
   passwordHash String?
   avatar       String?
   role         UserRole @default(USER)
@@ -37,7 +37,7 @@ model User {
 }
 
 model Event {
-  id               String  @id @default(cuid())
+  id               Int     @id @default(autoincrement())
   title            String
   description      String?
   shortDescription String?
@@ -64,11 +64,11 @@ model Event {
   isFeatured Boolean     @default(false)
   isPublic   Boolean     @default(true)
 
-  organizer   User   @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
-  organizerId String
+  organizer   User @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  organizerId Int
 
   category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?
+  categoryId Int?
 
   tickets  Ticket[]
   bookings Booking[]
@@ -86,7 +86,7 @@ model Event {
 }
 
 model Category {
-  id          String  @id @default(cuid())
+  id          Int     @id @default(autoincrement())
   name        String  @unique
   description String?
   slug        String  @unique
@@ -101,7 +101,7 @@ model Category {
 }
 
 model Ticket {
-  id       String @id @default(cuid())
+  id       Int    @id @default(autoincrement())
   ticketId String @unique
   qrCode   String @unique
 
@@ -109,14 +109,14 @@ model Ticket {
   seatNumber String?
   status     TicketStatus @default(AVAILABLE)
 
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId String
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int
 
   booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  bookingId String?
+  bookingId Int?
 
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   validatedAt DateTime?
   validatedBy String?
@@ -133,7 +133,7 @@ model Ticket {
 }
 
 model Booking {
-  id          String @id @default(cuid())
+  id          Int    @id @default(autoincrement())
   bookingCode String @unique
 
   totalAmount   Float
@@ -141,14 +141,14 @@ model Booking {
   attendeeEmail String
   attendeeName  String?
 
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId String
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int
 
   payment   Payment? @relation(fields: [paymentId], references: [id])
-  paymentId String?  @unique
+  paymentId Int?     @unique
 
   tickets Ticket[]
 
@@ -165,7 +165,7 @@ model Booking {
 }
 
 model Payment {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   amount           Float
   currency         currencyCode  @default(INR)
@@ -179,8 +179,8 @@ model Payment {
   refundAmount Float?  @default(0)
   refundReason String?
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
   booking Booking?
 
@@ -197,7 +197,7 @@ model Payment {
 }
 
 model Notification {
-  id      String           @id @default(cuid())
+  id      Int              @id @default(autoincrement())
   type    NotificationType
   title   String
   message String
@@ -205,8 +205,8 @@ model Notification {
 
   metadata Json?
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 
   createdAt DateTime  @default(now())
   readAt    DateTime?
@@ -218,7 +218,7 @@ model Notification {
 }
 
 model AuditLog {
-  id          String  @id @default(cuid())
+  id          Int     @id @default(autoincrement())
   action      String
   resource    String
   resourceId  String
@@ -230,8 +230,8 @@ model AuditLog {
   ipAddress String?
   userAgent String?
 
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   createdAt DateTime @default(now())
 
@@ -242,8 +242,8 @@ model AuditLog {
 }
 
 model EventViewer {
-  id        String  @id @default(cuid())
-  eventId   String
+  id        Int     @id @default(autoincrement())
+  eventId   Int
   userId    String?
   socketId  String
   userAgent String?
@@ -261,7 +261,7 @@ model EventViewer {
 }
 
 model FileUpload {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   filename     String
   originalName String
@@ -273,8 +273,8 @@ model FileUpload {
   description String?
   tags        String[]
 
-  uploadedBy   User?   @relation(fields: [uploadedById], references: [id])
-  uploadedById String?
+  uploadedBy   User? @relation(fields: [uploadedById], references: [id])
+  uploadedById Int?
 
   createdAt DateTime @default(now())
 
@@ -284,7 +284,7 @@ model FileUpload {
 }
 
 model SystemSetting {
-  id          String  @id @default(cuid())
+  id          Int     @id @default(autoincrement())
   key         String  @unique
   value       String
   description String?
