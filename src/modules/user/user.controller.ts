@@ -2,10 +2,16 @@ import { Request, Response } from "express";
 import { prisma } from "../../shared/lib/prisma"
 import { userValidation } from "./user.validation";
 import { ApiResponse } from "../../shared/utils/errors/AppError.";
-import { generateAccessAndRefreshToken } from "../../shared/middleware/token";
-import { asyncHandler } from "../../shared/middleware/responseHandler";
+import { accessTokenGenerate, generateAccessAndRefreshToken } from "../../shared/middleware/token";
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
+import { google } from "../../shared/lib/oauth/google";
+import { generateCodeVerifier, generateState } from "arctic";
+import { findOrCreateUser } from "./user.service";
+
+interface AuthenticatedRequest extends Request {
+    user?: any; // Replace 'any' with your actual user type
+}
 
 //Authencation
 export const signUp = async (req: Request, res: Response) => {
@@ -54,6 +60,119 @@ export const signUp = async (req: Request, res: Response) => {
     }
 }
 
+export const getGoogleLogin = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        // Check if user already logged in
+        if (req.user) {
+            return res.redirect("/");
+        }
+
+        const state = generateState();
+        const codeVerifier = generateCodeVerifier();
+
+        // Generate authorization URL
+        const url = await google.createAuthorizationURL(
+            state,
+            codeVerifier,
+            ["openid", "profile", "email"]
+        );
+
+        // Set cookies for state and code verifier
+        res.cookie("google_oauth_state", state, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 15 * 60 * 1000, // 15 minutes
+            sameSite: "lax",
+            path: "/"
+        });
+
+        res.cookie("google_code_verifier", codeVerifier, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 15 * 60 * 1000,
+            sameSite: "lax",
+            path: "/"
+        });
+
+        // For API calls - return JSON, for browsers - redirect
+        const acceptsJson = req.get("Accept")?.includes("application/json");
+
+        if (acceptsJson) {
+            return res.json({
+                success: true,
+                redirectUrl: url.toString(),
+                message: "Redirect to Google OAuth"
+            });
+        }
+
+        return res.redirect(url.toString());
+
+    } catch (error) {
+        console.error("Google OAuth initiation error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+export const googleCallback = async (req: Request, res: Response) => {
+    try {
+        const { code, state } = req.query;
+        const storedState = req.cookies?.google_oauth_state;
+        const codeVerifier = req.cookies?.google_code_verifier;
+
+        if (!state || state !== storedState) {
+            return res.redirect(`${process.env.FRONTEND}/login?error=invalid_state`);
+        }
+
+        if (typeof code !== 'string') {
+            return res.redirect(`${process.env.FRONTEND}/login?error=invalid_code`);
+        }
+
+        const tokens = await google.validateAuthorizationCode(code, codeVerifier);
+
+        const accessToken = tokens.accessToken();
+
+        const response = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+        }
+
+        const googleUser = await response.json();
+
+        res.clearCookie('google_oauth_state');
+        res.clearCookie('google_code_verifier');
+
+        const user = await findOrCreateUser(googleUser, tokens);
+
+        const token = accessTokenGenerate({
+            id: user.id,
+            name: user.name,
+            email: user.email
+        });
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            sameSite: "lax",
+            path: "/"
+        });
+
+        return res.redirect(`${process.env.FRONTEND}/userDashboard?login=success`);
+
+    } catch (error) {
+        return res.redirect(`${process.env.FRONTEND}/login?error=auth_failed`);
+    }
+};
+
 export const signIn = async (req: Request, res: Response) => {
     try {
         const parsedData = userValidation.safeParse(req.body)
@@ -94,7 +213,7 @@ export const signIn = async (req: Request, res: Response) => {
             }
         })
 
-        const { passwordHash, ...rest } = user
+        const { passwordHash, createdAt, updatedAt, ...rest } = user
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,//development me HTTPS nahi ho to false kar sakte ho
@@ -132,7 +251,7 @@ export const signOut = async (req: Request, res: Response) => {
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as { id: number };
-                
+
                 await prisma.user.update({
                     where: { id: decoded.id },
                     data: {
@@ -157,7 +276,7 @@ export const signOut = async (req: Request, res: Response) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict' as const
         };
-        
+
         res.clearCookie('accessToken', options);
         res.clearCookie('refreshToken', options);
 
@@ -169,7 +288,6 @@ export const signOut = async (req: Request, res: Response) => {
 }
 
 //user
-
 export const getUserProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.params.id;
@@ -217,7 +335,7 @@ export const filterUser = async (req: Request, res: Response) => {
                 phone: true,
                 role: true,
                 createdAt: true
-            
+
             }
         });
 
@@ -225,8 +343,8 @@ export const filterUser = async (req: Request, res: Response) => {
             where: whereClause
         });
 
-        return ApiResponse.success(res, { 
-            message: "Users fetched successfully", 
+        return ApiResponse.success(res, {
+            message: "Users fetched successfully",
             data: {
                 users,
                 pagination: {
