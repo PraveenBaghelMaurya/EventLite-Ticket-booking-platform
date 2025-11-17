@@ -58,7 +58,7 @@ export const signUp = async (req: Request, res: Response) => {
     } catch (error) {
         return ApiResponse.error(res, { message: "Internal server error" })
     }
-}
+};
 
 export const getGoogleLogin = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -232,7 +232,7 @@ export const signIn = async (req: Request, res: Response) => {
         return ApiResponse.error(res, { message: "Internal server error" })
     }
 
-}
+};
 
 export const signOut = async (req: Request, res: Response) => {
     try {
@@ -285,7 +285,7 @@ export const signOut = async (req: Request, res: Response) => {
             message: 'Signed out successfully'
         });
     }
-}
+};
 
 //user
 export const getUserProfile = async (req: Request, res: Response) => {
@@ -303,7 +303,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
     } catch (error) {
         return ApiResponse.error(res, { message: "Internal server error" })
     }
-}
+};
 
 export const filterUser = async (req: Request, res: Response) => {
     try {
@@ -362,7 +362,7 @@ export const filterUser = async (req: Request, res: Response) => {
         console.error('Filter user error:', error);
         return ApiResponse.error(res, { message: "Internal server error" });
     }
-}
+};
 
 //with verification user can not update email and phone
 
