@@ -24,9 +24,9 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
-app.use(helmet());
-app.use(limiter);
-app.use(morgan('combined'));
+app.use(helmet());// We use Helmet in Node.js to secure Express apps by setting various HTTP headers that protect against common web vulnerabilities like XSS, clickjacking, etc.
+app.use(limiter);//limit the number of requests
+app.use(morgan('tiny'));// show API request in console
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())

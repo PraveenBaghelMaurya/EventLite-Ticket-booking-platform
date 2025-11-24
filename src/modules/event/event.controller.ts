@@ -57,6 +57,7 @@ export const createEvent = async (req: Request, res: Response) => {
                 data: {
                     title: event.title || "",
                     description: event.description,
+                    shortDescription: event.shortDescription,
                     venue: event.venue,
                     street: event.street,
                     city: event.city,
@@ -268,12 +269,11 @@ export const updateEventById = async (req: Request, res: Response) => {
         const { event, category } = parsedData.data
         const organizerId = userId!;
 
-        const eventDetails = await prisma.$transaction(async (tx) => {
-            let categoryId = event.categoryId;
+        let categoryId = event.categoryId;
 
-            if (category) {
+        if (category) {
 
-                const newCategory = await tx.category.update({
+                const newCategory = await prisma.category.update({
                     where: {
                         id: parseInt(id)
                     },
@@ -287,14 +287,15 @@ export const updateEventById = async (req: Request, res: Response) => {
                 categoryId = newCategory.id;
             }
 
-            if (!categoryId) {
-                throw new Error("Either category data or categoryId is required");
-            }
 
-            const createdEvent = await tx.event.create({
+            const updatedEvent = await prisma.event.update({
+                where: {
+                    id: parseInt(id)
+                },
                 data: {
                     title: event.title || "",
                     description: event.description,
+                    shortDescription: event.shortDescription,
                     venue: event.venue,
                     street: event.street,
                     city: event.city,
@@ -312,7 +313,6 @@ export const updateEventById = async (req: Request, res: Response) => {
                     status: event.status,
                     isFeatured: event.isFeatured,
                     isPublic: event.isPublic,
-                    categoryId: categoryId,
                     organizerId: organizerId
                 },
                 include: {
@@ -320,12 +320,9 @@ export const updateEventById = async (req: Request, res: Response) => {
                 }
             });
 
-            return createdEvent;
-        })
-
         return ApiResponse.success(res, {
             message: "Event updated successfully",
-            data: eventDetails
+            data: updatedEvent
         });
 
     } catch (error: any) {

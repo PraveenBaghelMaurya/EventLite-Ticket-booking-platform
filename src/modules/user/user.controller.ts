@@ -166,7 +166,7 @@ export const googleCallback = async (req: Request, res: Response) => {
             path: "/"
         });
 
-        return res.redirect(`${process.env.FRONTEND}/userDashboard?login=success`);
+        return res.redirect(`${process.env.FRONTEND}/events?login=success`);
 
     } catch (error) {
         return res.redirect(`${process.env.FRONTEND}/login?error=auth_failed`);

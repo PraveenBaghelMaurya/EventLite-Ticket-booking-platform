@@ -3,6 +3,7 @@ import { z } from "zod";
 export const eventValidation = z.object({
     title: z.string().min(3, "Title must be at least 3 characters long").optional(),
     description: z.string().min(10, "Description must be at least 10 characters long").optional(),
+    shortDescription: z.string().min(10, "Short description must be at least 10 characters long").optional(),
     venue: z.string().min(3, "Venue must be at least 3 characters long").optional(),
     street: z.string().min(3, "Street must be at least 3 characters long").optional(),
     city: z.string().min(3, "City must be at least 3 characters long").optional(),
