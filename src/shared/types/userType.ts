@@ -29,7 +29,7 @@ declare global {
   }
 }
 
-export {};
+export { };
 
 export enum UserRoleNumber {
   ADMIN = 1,
@@ -39,6 +39,16 @@ export enum UserRoleNumber {
 
 export interface JWTPayload {
   id: number;
+  name: string;
   email: string;
-  role: UserRoleNumber;
+  role: UserRole;
+}
+
+export interface user {
+  id: number;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+  refreshToken: string | null;
+  accessToken: string | null;
 }

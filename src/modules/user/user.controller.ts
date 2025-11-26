@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken";
 import { google } from "../../shared/lib/oauth/google";
 import { generateCodeVerifier, generateState } from "arctic";
 import { findOrCreateUser } from "./user.service";
+import { JWTPayload } from '../../shared/types/userType'
+// import type{user} from '../../shared/types/userType'
 
 interface AuthenticatedRequest extends Request {
     user?: any; // Replace 'any' with your actual user type
@@ -155,7 +157,10 @@ export const googleCallback = async (req: Request, res: Response) => {
         const token = accessTokenGenerate({
             id: user.id,
             name: user.name,
-            email: user.email
+            role: 'USER',
+            email: user.email,
+            accessToken: null,
+            refreshToken: null
         });
 
         res.cookie("token", token, {
@@ -221,7 +226,7 @@ export const signIn = async (req: Request, res: Response) => {
             sameSite: "strict",
 
         }).cookie("accessToken", accessToken, {
-            httpOnly: true,
+            httpOnly: false,
             secure: true,
             sameSite: "strict",
 
@@ -363,6 +368,43 @@ export const filterUser = async (req: Request, res: Response) => {
         return ApiResponse.error(res, { message: "Internal server error" });
     }
 };
+
+export const refreshAccessToken = async (req: Request, res: Response) => {
+    try {
+        const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
+
+        if (!incomingToken) {
+            return ApiResponse.error(res, { message: "Token not found" })
+        }
+
+        const user = jwt.verify(incomingToken, process.env.REFRESH_TOKEN_SECRET as string) as JWTPayload;
+
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                id: user.id
+            }
+        });
+
+        if (incomingToken !== existingUser?.refreshToken) {
+            return ApiResponse.error(res, { message: "Token not match" })
+        }
+        const option = {
+            httpOnly: true,
+            secure: true
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user);
+
+        return ApiResponse.success(res, {
+            message: `accessToken:${accessToken},
+             refreshToken:${refreshToken}`
+        })
+            .cookie("accessToken", accessToken, option)
+            .cookie("refreshToken", refreshToken, option);
+    } catch (error: any) {
+        return ApiResponse.error(res, { message: error })
+    }
+}
 
 //with verification user can not update email and phone
 
