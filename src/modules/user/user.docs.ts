@@ -1,3 +1,5 @@
+// D:\Custom\MCA\Project\Eventlite\BACKEND\src\modules\user\user.docs.ts
+
 /**
  * @swagger
  * components:
@@ -440,6 +442,9 @@
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 success:
  *                   type: boolean
  *                   example: true
