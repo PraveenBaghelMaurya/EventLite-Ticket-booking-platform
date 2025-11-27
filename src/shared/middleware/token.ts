@@ -75,7 +75,9 @@ export const verifyAccessToken = (requiredRole:UserRole[]=[])=>(req: Request, re
 
     next();
   } catch (error: any) {
-    return ApiResponse.error(res, { message: `INTERNAL SERVER ERROR ${error}` })
+    return ApiResponse.error(res, { message: `access token expire`,
+      error
+     })
   }
 
 }

@@ -394,6 +394,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
         }
 
         const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user);
+        console.log("✅ refresh token callled")
 
         return ApiResponse.success(res, {
             message: `accessToken:${accessToken},
