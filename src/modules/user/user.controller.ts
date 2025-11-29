@@ -68,6 +68,7 @@ export const getGoogleLogin = async (req: AuthenticatedRequest, res: Response) =
         if (req.user) {
             return res.redirect("/");
         }
+        console.log("user getGoogleLogin",req.user)
 
         const state = generateState();
         const codeVerifier = generateCodeVerifier();
@@ -125,7 +126,7 @@ export const googleCallback = async (req: Request, res: Response) => {
         const codeVerifier = req.cookies?.google_code_verifier;
 
         if (!state || state !== storedState) {
-            return res.redirect(`${process.env.FRONTEND}/login?error=invalid_state`);
+            return res.redirect(`${process.env.FRONTEND}?error=invalid_state`);
         }
 
         if (typeof code !== 'string') {
