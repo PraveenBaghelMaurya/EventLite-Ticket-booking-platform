@@ -29,12 +29,12 @@ declare global {
   }
 }
 
-export { };
+export {};
 
 export enum UserRoleNumber {
   ADMIN = 1,
   ORGANIZER = 2,
-  USER = 3
+  USER = 3,
 }
 
 export interface JWTPayload {

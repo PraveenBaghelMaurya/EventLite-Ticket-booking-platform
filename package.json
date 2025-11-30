@@ -13,6 +13,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
+    "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"**/*.ts\"",
@@ -54,6 +55,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.0.2",
+    "prettier": "^3.7.3",
     "prisma": "^6.18.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

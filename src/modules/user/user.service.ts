@@ -1,20 +1,26 @@
-import { prisma } from "../../shared/lib/prisma"
-import { accessTokenGenerate, refreshTokenGenerate } from "../../shared/middleware/token"
+import { prisma } from '../../shared/lib/prisma';
+import {
+  accessTokenGenerate,
+  refreshTokenGenerate,
+} from '../../shared/middleware/token';
 
 export const findOrCreateUser = async (googleUser: any, tokens: any) => {
-  const { sub: googleId, email, given_name, family_name, picture: avatar } = googleUser;
+  const {
+    sub: googleId,
+    email,
+    given_name,
+    family_name,
+    picture: avatar,
+  } = googleUser;
 
-  const accessTokenValue = accessTokenGenerate(googleUser)
-  const refreshTokenValue = refreshTokenGenerate(googleUser.id)
+  const accessTokenValue = accessTokenGenerate(googleUser);
+  const refreshTokenValue = refreshTokenGenerate(googleUser.id);
   try {
     // Check if user exists by googleId or email
     let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { googleId: googleId },
-          { email: email }
-        ]
-      }
+        OR: [{ googleId: googleId }, { email: email }],
+      },
     });
 
     if (user) {
@@ -27,10 +33,9 @@ export const findOrCreateUser = async (googleUser: any, tokens: any) => {
           avatar: avatar || user.avatar,
           accessToken: accessTokenValue,
           refreshToken: refreshTokenValue,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       });
-
     } else {
       // Create new user
       user = await prisma.user.create({
@@ -41,8 +46,8 @@ export const findOrCreateUser = async (googleUser: any, tokens: any) => {
           avatar: avatar,
           accessToken: accessTokenValue,
           refreshToken: refreshTokenValue,
-          role: "USER"
-        }
+          role: 'USER',
+        },
       });
     }
 

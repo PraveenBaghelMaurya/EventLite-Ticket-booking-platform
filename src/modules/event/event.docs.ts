@@ -106,7 +106,7 @@
  *           type: string
  *           format: date-time
  *           description: The last update timestamp
- * 
+ *
  *     Category:
  *       type: object
  *       properties:
@@ -125,7 +125,7 @@
  *         image:
  *           type: string
  *           description: Category image URL
- * 
+ *
  *     EventWithCategory:
  *       type: object
  *       required:
@@ -192,7 +192,7 @@
  *               type: string
  *             image:
  *               type: string
- * 
+ *
  *     EventResponse:
  *       type: object
  *       properties:
@@ -202,7 +202,7 @@
  *           type: string
  *         data:
  *           $ref: '#/components/schemas/Event'
- * 
+ *
  *     EventsListResponse:
  *       type: object
  *       properties:
@@ -236,7 +236,7 @@
  *                   type: string
  *                 sortOrder:
  *                   type: string
- * 
+ *
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -246,7 +246,7 @@
  *           type: string
  *         error:
  *           type: object
- * 
+ *
  *   parameters:
  *     EventIdParam:
  *       in: path
@@ -255,7 +255,7 @@
  *       schema:
  *         type: integer
  *       description: Event ID
- * 
+ *
  *     PageQuery:
  *       in: query
  *       name: page
@@ -264,7 +264,7 @@
  *         minimum: 1
  *         default: 1
  *       description: Page number for pagination
- * 
+ *
  *     LimitQuery:
  *       in: query
  *       name: limit
@@ -274,21 +274,21 @@
  *         maximum: 50
  *         default: 10
  *       description: Number of items per page (max 50)
- * 
+ *
  *     SearchQuery:
  *       in: query
  *       name: searchQuery
  *       schema:
  *         type: string
  *       description: Search query for event title, description
- * 
+ *
  *     CategoryTypeQuery:
  *       in: query
  *       name: categoryType
  *       schema:
  *         type: string
  *       description: Filter by category name
- * 
+ *
  *     TimeRangeQuery:
  *       in: query
  *       name: timeRange
@@ -296,7 +296,7 @@
  *         type: string
  *         enum: [today, this-week, this-month, next-3-months, upcoming]
  *       description: Filter events by time range
- * 
+ *
  *     SortByQuery:
  *       in: query
  *       name: sortBy
@@ -305,7 +305,7 @@
  *         enum: [startDate, createdAt, price, title]
  *         default: startDate
  *       description: Field to sort by
- * 
+ *
  *     SortOrderQuery:
  *       in: query
  *       name: sortOrder
@@ -314,7 +314,7 @@
  *         enum: [asc, desc]
  *         default: asc
  *       description: Sort order
- * 
+ *
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
