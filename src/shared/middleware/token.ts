@@ -7,8 +7,10 @@ import { UserRole } from "@prisma/client";
 import type { JWTPayload, user } from '../types/userType'
 import { partial } from "zod/v4/core/util.cjs";
 
+
 dotenv.config();
 
+  
 export const accessTokenGenerate = (user: user) => {
   try {
     const accessToken = jwt.sign({
@@ -24,6 +26,7 @@ export const accessTokenGenerate = (user: user) => {
     throw error;
   }
 }
+
 
 export const refreshTokenGenerate = (user: user) => {
   try {
@@ -42,6 +45,13 @@ export const refreshTokenGenerate = (user: user) => {
 }
 
 export const generateAccessAndRefreshToken = (user: any) => {
+  try {
+    const accessToken = accessTokenGenerate(user)
+    const refreshToken = refreshTokenGenerate(user.id)
+    return { accessToken, refreshToken }
+  } catch (error) {
+    throw error;
+  }
   try {
     const accessToken = accessTokenGenerate(user)
     const refreshToken = refreshTokenGenerate(user.id)
