@@ -43,7 +43,7 @@
  *           format: date-time
  *           description: The last update timestamp
  *           example: "2024-01-20T14:45:00.000Z"
- * 
+ *
  *     UserSignUp:
  *       type: object
  *       required:
@@ -69,7 +69,7 @@
  *           format: password
  *           description: The password for the account
  *           example: "SecurePass123!"
- * 
+ *
  *     UserSignIn:
  *       type: object
  *       required:
@@ -86,7 +86,7 @@
  *           format: password
  *           description: The password for the account
  *           example: "SecurePass123!"
- * 
+ *
  *     AuthResponse:
  *       type: object
  *       properties:
@@ -114,7 +114,7 @@
  *             role:
  *               type: string
  *               example: "ORGANIZER"
- * 
+ *
  *     UsersListResponse:
  *       type: object
  *       properties:
@@ -172,7 +172,7 @@
  *                 hasPrev:
  *                   type: boolean
  *                   example: false
- * 
+ *
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -191,7 +191,7 @@
  *             details:
  *               type: string
  *               example: "Invalid credentials provided"
- * 
+ *
  *     GoogleAuthResponse:
  *       type: object
  *       properties:
@@ -204,7 +204,7 @@
  *         message:
  *           type: string
  *           example: "Redirect to Google OAuth"
- * 
+ *
  *   parameters:
  *     UserIdParam:
  *       in: path
@@ -214,7 +214,7 @@
  *         type: integer
  *         example: 1
  *       description: User ID
- * 
+ *
  *     PageQuery:
  *       in: query
  *       name: page
@@ -224,7 +224,7 @@
  *         default: 1
  *         example: 1
  *       description: Page number for pagination
- * 
+ *
  *     LimitQuery:
  *       in: query
  *       name: limit
@@ -234,7 +234,7 @@
  *         default: 10
  *         example: 10
  *       description: Number of items per page
- * 
+ *
  *     SearchQuery:
  *       in: query
  *       name: searchQuery
@@ -242,7 +242,7 @@
  *         type: string
  *         example: "praveen"
  *       description: Search query for user name, email, or phone
- * 
+ *
  *   securitySchemes:
  *     bearerAuth:
  *       type: http

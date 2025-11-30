@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse } from '../../shared/utils/errors/AppError.';
 
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   console.error(err.stack);
 
   if (err.name === 'ValidationError') {
@@ -27,6 +32,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 };
 
 // Async handler wrapper
-export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
+export const asyncHandler =
+  (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
