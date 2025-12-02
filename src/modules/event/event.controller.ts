@@ -45,7 +45,7 @@ export const createEvent = async (req: Request, res: Response) => {
       });
     }
 
-    const eventDetails = await prisma.$transaction(async tx => {
+    const eventDetails = await prisma.$transaction(async (tx: any) => {
       let categoryId = event.categoryId;
 
       if (category) {

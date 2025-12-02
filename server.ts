@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 // Load environment variables
 dotenv.config();
-// testConnection()
+testConnection()
 swaggerDocs(app);
 
 // Middleware
